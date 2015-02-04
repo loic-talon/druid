@@ -19,8 +19,10 @@ package io.druid.query.extraction;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.common.base.Function;
 import io.druid.query.search.search.SearchQuerySpec;
 
+import javax.annotation.Nullable;
 import java.nio.ByteBuffer;
 
 /**
@@ -30,13 +32,22 @@ public class SearchQuerySpecDimExtractionFn implements DimExtractionFn
   private static final byte CACHE_TYPE_ID = 0x3;
 
   private final SearchQuerySpec searchQuerySpec;
-
+  private final Function<String, String> extractionFunction;
   @JsonCreator
   public SearchQuerySpecDimExtractionFn(
-      @JsonProperty("query") SearchQuerySpec searchQuerySpec
+      @JsonProperty("query") final SearchQuerySpec searchQuerySpec
   )
   {
     this.searchQuerySpec = searchQuerySpec;
+    this.extractionFunction = new Function<String, String>()
+    {
+      @Nullable
+      @Override
+      public String apply(String dimValue)
+      {
+        return searchQuerySpec.accept(dimValue) ? dimValue : null;
+      }
+    };
   }
 
   @JsonProperty("query")
@@ -56,9 +67,8 @@ public class SearchQuerySpecDimExtractionFn implements DimExtractionFn
   }
 
   @Override
-  public String apply(String dimValue)
-  {
-    return searchQuerySpec.accept(dimValue) ? dimValue : null;
+  public Function<String, String> getExtractionFunction(){
+    return this.extractionFunction;
   }
 
   @Override

@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package io.druid.query.extraction.extraction;
+package io.druid.query.extraction;
 
 import com.google.common.collect.Sets;
 import io.druid.query.extraction.DimExtractionFn;
@@ -45,7 +45,7 @@ public class TimeDimExtractionFnTest
     DimExtractionFn dimExtractionFn = new TimeDimExtractionFn("MM/dd/yyyy", "MM/yyyy");
 
     for (String dim : dims) {
-      months.add(dimExtractionFn.apply(dim));
+      months.add(dimExtractionFn.getExtractionFunction().apply(dim));
     }
 
     Assert.assertEquals(months.size(), 4);
@@ -62,7 +62,7 @@ public class TimeDimExtractionFnTest
     DimExtractionFn dimExtractionFn = new TimeDimExtractionFn("MM/dd/yyyy", "QQQ/yyyy");
 
     for (String dim : dims) {
-      quarters.add(dimExtractionFn.apply(dim));
+      quarters.add(dimExtractionFn.getExtractionFunction().apply(dim));
     }
 
     Assert.assertEquals(quarters.size(), 3);

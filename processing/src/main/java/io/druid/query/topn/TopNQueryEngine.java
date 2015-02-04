@@ -99,7 +99,8 @@ public class TopNQueryEngine
 
     TopNAlgorithm topNAlgorithm = null;
     if (selector.isHasDimExtractionFn()) {
-      topNAlgorithm = new DimExtractionTopNAlgorithm(capabilities, query);
+      //topNAlgorithm = new DimExtractionTopNAlgorithm(capabilities, query);
+      topNAlgorithm = new PooledTopNAlgorithm(capabilities, query, bufferPool);
     } else if (selector.isAggregateAllMetrics()) {
       topNAlgorithm = new PooledTopNAlgorithm(capabilities, query, bufferPool);
     } else if (selector.isAggregateTopNMetricFirst() || query.getContextValue("doAggregateTopNMetricFirst", false)) {

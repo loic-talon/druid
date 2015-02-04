@@ -19,9 +19,11 @@ package io.druid.query.extraction;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.common.base.Function;
 import com.ibm.icu.text.SimpleDateFormat;
 import com.metamx.common.StringUtils;
 
+import javax.annotation.Nullable;
 import java.nio.ByteBuffer;
 import java.text.ParseException;
 import java.util.Date;
@@ -36,6 +38,7 @@ public class TimeDimExtractionFn implements DimExtractionFn
   private final SimpleDateFormat timeFormatter;
   private final String resultFormat;
   private final SimpleDateFormat resultFormatter;
+  private final Function<String, String> extractionFn;
 
   @JsonCreator
   public TimeDimExtractionFn(
@@ -49,6 +52,22 @@ public class TimeDimExtractionFn implements DimExtractionFn
 
     this.resultFormat = resultFormat;
     this.resultFormatter = new SimpleDateFormat(resultFormat);
+    this.extractionFn = new Function<String, String>()
+    {
+      @Nullable
+      @Override
+      public String apply(@Nullable String dimValue)
+      {
+        Date date;
+        try {
+          date = timeFormatter.parse(dimValue);
+        }
+        catch (ParseException e) {
+          return dimValue;
+        }
+        return resultFormatter.format(date);
+      }
+    };
   }
 
   @Override
@@ -62,16 +81,8 @@ public class TimeDimExtractionFn implements DimExtractionFn
   }
 
   @Override
-  public String apply(String dimValue)
-  {
-    Date date;
-    try {
-      date = timeFormatter.parse(dimValue);
-    }
-    catch (ParseException e) {
-      return dimValue;
-    }
-    return resultFormatter.format(date);
+  public Function<String, String> getExtractionFunction(){
+    return this.extractionFn;
   }
 
   @JsonProperty("timeFormat")

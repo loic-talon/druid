@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package io.druid.query.extraction.extraction;
+package io.druid.query.extraction;
 
 import com.google.common.collect.Iterators;
 import com.google.common.collect.Lists;
@@ -46,7 +46,7 @@ public class JavascriptDimExtractionFnTest
     DimExtractionFn dimExtractionFn = new JavascriptDimExtractionFn(function);
 
     for (String str : testStrings) {
-      String res = dimExtractionFn.apply(str);
+      String res = dimExtractionFn.getExtractionFunction().apply(str);
       Assert.assertEquals(str.substring(0, 3), res);
     }
   }
@@ -60,7 +60,7 @@ public class JavascriptDimExtractionFnTest
     Iterator<String> it = Iterators.forArray("0", "5", "5", "10", null);
 
     for(String str : Lists.newArrayList("1", "5", "6", "10", "CA")) {
-      String res = dimExtractionFn.apply(str);
+      String res = dimExtractionFn.getExtractionFunction().apply(str);
       String expected = it.next();
       Assert.assertEquals(expected, res);
     }
@@ -74,7 +74,7 @@ public class JavascriptDimExtractionFnTest
 
     Iterator it = Iterators.forArray("Qt", "Clgry", "Tky", "Stckhlm", "Vncvr", "Prtr", "Wllngtn", "Ontr");
     for (String str : testStrings) {
-      String res = dimExtractionFn.apply(str);
+      String res = dimExtractionFn.getExtractionFunction().apply(str);
       Assert.assertEquals(it.next(), res);
     }
   }
@@ -280,7 +280,7 @@ public class JavascriptDimExtractionFnTest
     Iterator<String> it = Iterators.forArray("introduc", "exploratori", "analyt", "on", "larg", "dataset");
 
     while(inputs.hasNext()) {
-      String res = dimExtractionFn.apply(inputs.next());
+      String res = dimExtractionFn.getExtractionFunction().apply(inputs.next());
       Assert.assertEquals(it.next(), res);
     }
   }

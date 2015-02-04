@@ -92,7 +92,7 @@ public class TopNQueryRunnerTest
                       @Override
                       public ByteBuffer get()
                       {
-                        return ByteBuffer.allocate(2000);
+                        return ByteBuffer.allocate(20000);
                       }
                     }
                 ),
@@ -1690,6 +1690,15 @@ public class TopNQueryRunnerTest
   {
     final DimExtractionFn nullStringDimExtraction = new DimExtractionFn()
     {
+      final Function<String, String> extractionFunction = new Function<String, String>()
+      {
+        @Nullable
+        @Override
+        public String apply(@Nullable String dimValue)
+        {
+          return dimValue.equals("total_market") ? null : dimValue;
+        }
+      };
       @Override
       public byte[] getCacheKey()
       {
@@ -1697,9 +1706,8 @@ public class TopNQueryRunnerTest
       }
 
       @Override
-      public String apply(String dimValue)
-      {
-        return dimValue.equals("total_market") ? null : dimValue;
+      public Function<String, String> getExtractionFunction(){
+        return extractionFunction;
       }
 
       @Override
@@ -1768,6 +1776,16 @@ public class TopNQueryRunnerTest
   {
     final DimExtractionFn emptyStringDimExtraction = new DimExtractionFn()
     {
+      final Function<String, String> extractionFunction = new Function<String, String>()
+      {
+        @Nullable
+        @Override
+        public String apply(String dimValue)
+        {
+          return dimValue.equals("total_market") ? "" : dimValue;
+        }
+      };
+
       @Override
       public byte[] getCacheKey()
       {
@@ -1775,9 +1793,9 @@ public class TopNQueryRunnerTest
       }
 
       @Override
-      public String apply(String dimValue)
+      public Function<String, String> getExtractionFunction()
       {
-        return dimValue.equals("total_market") ? "" : dimValue;
+        return extractionFunction;
       }
 
       @Override

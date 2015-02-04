@@ -17,6 +17,7 @@
 
 package io.druid.segment.filter;
 
+import com.google.common.base.Function;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.metamx.collections.bitmap.BitmapFactory;
@@ -36,6 +37,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
+import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.Map;
 
@@ -103,10 +105,17 @@ public class ExtractionDimFilterTest
     }
 
     @Override
-    public String apply(String dimValue)
+    public Function<String, String> getExtractionFunction()
     {
-      final String retval = EXTRACTION_VALUES.get(dimValue);
-      return retval == null ? dimValue : retval;
+      return new Function<String, String>()
+      {
+        @Override
+        public String apply(String dimValue)
+        {
+          final String retval = EXTRACTION_VALUES.get(dimValue);
+          return retval == null ? dimValue : retval;
+        }
+      };
     }
 
     @Override

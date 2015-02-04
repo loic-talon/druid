@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package io.druid.query.extraction.extraction;
+package io.druid.query.extraction;
 
 import com.google.common.collect.Sets;
 import io.druid.query.extraction.DimExtractionFn;
@@ -57,7 +57,7 @@ public class RegexDimExtractionFnTest
     Set<String> extracted = Sets.newHashSet();
 
     for (String path : paths) {
-      extracted.add(dimExtractionFn.apply(path));
+      extracted.add(dimExtractionFn.getExtractionFunction().apply(path));
     }
 
     Assert.assertEquals(2, extracted.size());
@@ -73,7 +73,7 @@ public class RegexDimExtractionFnTest
     Set<String> extracted = Sets.newHashSet();
 
     for (String path : paths) {
-      extracted.add(dimExtractionFn.apply(path));
+      extracted.add(dimExtractionFn.getExtractionFunction().apply(path));
     }
 
     Assert.assertEquals(4, extracted.size());
@@ -91,7 +91,7 @@ public class RegexDimExtractionFnTest
     Set<String> extracted = Sets.newHashSet();
 
     for (String testString : testStrings) {
-      extracted.add(dimExtractionFn.apply(testString));
+      extracted.add(dimExtractionFn.getExtractionFunction().apply(testString));
     }
 
     Assert.assertEquals(3, extracted.size());

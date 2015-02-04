@@ -33,6 +33,7 @@ Druid interacts with ZK through a set of standard path configurations. We recomm
 |`druid.zk.paths.loadQueuePath`|Entries here cause historical nodes to load and drop segments.|`${druid.zk.paths.base}/loadQueue`|
 |`druid.zk.paths.coordinatorPath`|Used by the coordinator for leader election.|`${druid.zk.paths.base}/coordinator`|
 |`druid.zk.paths.servedSegmentsPath`|@Deprecated. Legacy path for where Druid nodes announce their segments.|`${druid.zk.paths.base}/servedSegments`|
+|`druid.zk.paths.namespacePath`|The path to pull namespace updates from|`${druid.zk.paths.base}/namespaces`|
 
 The indexing service also uses its own set of paths. These configs can be included in the common configuration.
 

@@ -399,7 +399,7 @@ public class GroupByQueryEngine
                     final int dimVal = keyBuffer.getInt();
                     if (dimSelector.getValueCardinality() != dimVal) {
                       if (fn != null) {
-                        theEvent.put(dimNames.get(i), fn.apply(dimSelector.lookupName(dimVal)));
+                        theEvent.put(dimNames.get(i), fn.getExtractionFunction().apply(dimSelector.lookupName(dimVal)));
                       } else {
                         theEvent.put(dimNames.get(i), dimSelector.lookupName(dimVal));
                       }

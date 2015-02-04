@@ -284,6 +284,15 @@ public class GroupByQueryRunnerTest
     final DimExtractionFn fn1 = new RegexDimExtractionFn("(\\w{1})");
     final DimExtractionFn nullExtractionFn = new DimExtractionFn()
     {
+      final Function<String, String> extractionFunction = new Function<String, String>()
+      {
+        @Nullable
+        @Override
+        public String apply(String dimValue)
+        {
+          return  dimValue.equals("mezzanine") ? null : fn1.getExtractionFunction().apply(dimValue);
+        }
+      };
       @Override
       public byte[] getCacheKey()
       {
@@ -291,9 +300,8 @@ public class GroupByQueryRunnerTest
       }
 
       @Override
-      public String apply(String dimValue)
-      {
-        return dimValue.equals("mezzanine") ? null : fn1.apply(dimValue);
+      public Function<String, String> getExtractionFunction(){
+        return this.extractionFunction;
       }
 
       @Override
@@ -351,6 +359,15 @@ public class GroupByQueryRunnerTest
     final DimExtractionFn fn1 = new RegexDimExtractionFn("(\\w{1})");
     final DimExtractionFn emptyStringExtractionFn = new DimExtractionFn()
     {
+      final Function<String, String> extractionFunction = new Function<String, String>()
+      {
+        @Nullable
+        @Override
+        public String apply(String dimValue)
+        {
+          return  dimValue.equals("mezzanine") ? "" : fn1.getExtractionFunction().apply(dimValue);
+        }
+      };
       @Override
       public byte[] getCacheKey()
       {
@@ -358,9 +375,8 @@ public class GroupByQueryRunnerTest
       }
 
       @Override
-      public String apply(String dimValue)
-      {
-        return dimValue.equals("mezzanine") ? "" : fn1.apply(dimValue);
+      public Function<String, String> getExtractionFunction(){
+        return this.extractionFunction;
       }
 
       @Override

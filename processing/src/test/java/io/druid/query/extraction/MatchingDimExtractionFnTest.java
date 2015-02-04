@@ -15,13 +15,11 @@
  * limitations under the License.
  */
 
-package io.druid.query.extraction.extraction;
+package io.druid.query.extraction;
 
 import com.google.common.collect.Sets;
 import io.druid.query.extraction.DimExtractionFn;
-import io.druid.query.extraction.SearchQuerySpecDimExtractionFn;
-import io.druid.query.search.search.FragmentSearchQuerySpec;
-import io.druid.query.search.search.SearchQuerySpec;
+import io.druid.query.extraction.MatchingDimExtractionFn;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -31,37 +29,36 @@ import java.util.Set;
 
 /**
  */
-public class SearchQuerySpecDimExtractionFnTest
+public class MatchingDimExtractionFnTest
 {
   private static final String[] testStrings = {
-      "Kyoto",
+      "Quito",
       "Calgary",
       "Tokyo",
       "Stockholm",
-      "Toyokawa",
+      "Vancouver",
       "Pretoria",
-      "Yorktown",
+      "Wellington",
+      null,
       "Ontario"
   };
 
   @Test
   public void testExtraction()
   {
-    SearchQuerySpec spec = new FragmentSearchQuerySpec(
-        Arrays.asList("to", "yo")
-    );
-    DimExtractionFn dimExtractionFn = new SearchQuerySpecDimExtractionFn(spec);
-    List<String> expected = Arrays.asList("Kyoto", "Tokyo", "Toyokawa", "Yorktown");
+    String regex = ".*[Tt][Oo].*";
+    DimExtractionFn dimExtractionFn = new MatchingDimExtractionFn(regex);
+    List<String> expected = Arrays.asList("Quito", "Tokyo", "Stockholm", "Pretoria", "Wellington");
     Set<String> extracted = Sets.newHashSet();
 
     for (String str : testStrings) {
-      String res = dimExtractionFn.apply(str);
+      String res = dimExtractionFn.getExtractionFunction().apply(str);
       if (res != null) {
         extracted.add(res);
       }
     }
 
-    Assert.assertEquals(4, extracted.size());
+    Assert.assertEquals(5, extracted.size());
 
     for (String str : extracted) {
       Assert.assertTrue(expected.contains(str));

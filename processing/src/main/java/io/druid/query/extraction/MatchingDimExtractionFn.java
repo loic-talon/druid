@@ -19,8 +19,10 @@ package io.druid.query.extraction;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.common.base.Function;
 import com.metamx.common.StringUtils;
 
+import javax.annotation.Nullable;
 import java.nio.ByteBuffer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -33,6 +35,7 @@ public class MatchingDimExtractionFn implements DimExtractionFn
 
   private final String expr;
   private final Pattern pattern;
+  private final Function<String, String> extractionFunction;
 
   @JsonCreator
   public MatchingDimExtractionFn(
@@ -41,6 +44,17 @@ public class MatchingDimExtractionFn implements DimExtractionFn
   {
     this.expr = expr;
     this.pattern = Pattern.compile(expr);
+    this.extractionFunction = new Function<String, String>()
+    {
+      @Nullable
+      @Override
+      public String apply(String dimValue)
+      {
+        dimValue = (dimValue == null) ? "" : dimValue;
+        Matcher matcher = pattern.matcher(dimValue);
+        return matcher.find() ? dimValue : null;
+      }
+    };
   }
 
   @Override
@@ -54,11 +68,8 @@ public class MatchingDimExtractionFn implements DimExtractionFn
   }
 
   @Override
-  public String apply(String dimValue)
-  {
-    dimValue = (dimValue == null) ? "" : dimValue;
-    Matcher matcher = pattern.matcher(dimValue);
-    return matcher.find() ? dimValue : null;
+  public Function<String, String> getExtractionFunction(){
+    return this.extractionFunction;
   }
 
   @JsonProperty("expr")

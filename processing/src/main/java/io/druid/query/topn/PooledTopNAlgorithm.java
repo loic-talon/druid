@@ -17,11 +17,14 @@
 
 package io.druid.query.topn;
 
+import com.google.common.base.Function;
 import com.metamx.common.Pair;
+import com.metamx.common.UOE;
 import com.metamx.common.guava.CloseQuietly;
 import io.druid.collections.ResourceHolder;
 import io.druid.collections.StupidPool;
 import io.druid.query.aggregation.BufferAggregator;
+import io.druid.query.extraction.DimExtractionFn;
 import io.druid.segment.Capabilities;
 import io.druid.segment.Cursor;
 import io.druid.segment.DimensionSelector;
@@ -63,6 +66,38 @@ public class PooledTopNAlgorithm
     resultsBuf.clear();
 
     final int cardinality = dimSelector.getValueCardinality();
+
+    final DimExtractionFn dimExtractionFn =  query.getDimensionSpec().getDimExtractionFn();
+    if(dimExtractionFn != null){
+      final DimensionSelector delegate = dimSelector;
+      final Function<String, String> fn = dimExtractionFn.getExtractionFunction();
+      dimSelector = new DimensionSelector()
+      {
+        @Override
+        public IndexedInts getRow()
+        {
+          return delegate.getRow();
+        }
+
+        @Override
+        public int getValueCardinality()
+        {
+          return delegate.getValueCardinality();
+        }
+
+        @Override
+        public String lookupName(int id)
+        {
+          return fn.apply(delegate.lookupName(id));
+        }
+
+        @Override
+        public int lookupId(String name)
+        {
+          throw new UOE("Does not support reverse lookup");
+        }
+      };
+    }
 
     final TopNMetricSpecBuilder<int[]> arrayProvider = new BaseArrayProvider<int[]>(
         dimSelector,

@@ -19,6 +19,7 @@ package io.druid.query.extraction;
 
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.google.common.base.Function;
 
 /**
  */
@@ -28,7 +29,9 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
     @JsonSubTypes.Type(name = "regex", value = RegexDimExtractionFn.class),
     @JsonSubTypes.Type(name = "partial", value = MatchingDimExtractionFn.class),
     @JsonSubTypes.Type(name = "searchQuery", value = SearchQuerySpecDimExtractionFn.class),
-    @JsonSubTypes.Type(name = "javascript", value = JavascriptDimExtractionFn.class)
+    @JsonSubTypes.Type(name = "javascript", value = JavascriptDimExtractionFn.class),
+    @JsonSubTypes.Type(name = "explicitRename", value = ExplicitDimRenameFn.class),
+    @JsonSubTypes.Type(name = "namespace", value = NamespacedExtraction.class)
 })
 /**
  * A DimExtractionFn is a function that can be used to modify the values of a dimension column.
@@ -48,18 +51,16 @@ public interface DimExtractionFn
   public byte[] getCacheKey();
 
   /**
-   * The "extraction" function.  This should map a dimension value into some other value.
+   * The "extraction" function factory method.  The return of this method should map a dimension value into some other value.
    *
    * In order to maintain the "null and empty string are equivalent" semantics that Druid provides, the
    * empty string is considered invalid output for this method and should instead return null.  This is
    * a contract on the method rather than enforced at a lower level in order to eliminate a global check
    * for extraction functions that do not already need one.
    *
-   *
-   * @param dimValue the original value of the dimension
    * @return a value that should be used instead of the original
    */
-  public String apply(String dimValue);
+  public Function<String, String> getExtractionFunction();
 
   /**
    * Offers information on whether the extraction will preserve the original ordering of the values.

@@ -54,7 +54,14 @@ public class JavascriptDimExtractionFn implements DimExtractionFn
         }
 
         final Object res = fn.call(cx, scope, scope, new String[]{input});
-        return res != null ? Context.toString(res) : null;
+        if(res == null){
+          return null;
+        }
+        String retval = Context.toString(res);
+        if(Strings.isNullOrEmpty(retval)){
+          return null;
+        }
+        return retval;
       }
     };
   }
@@ -90,10 +97,8 @@ public class JavascriptDimExtractionFn implements DimExtractionFn
   }
 
   @Override
-  public String apply(String dimValue)
-  {
-    String retVal = fn.apply(dimValue);
-    return Strings.isNullOrEmpty(retVal) ? null : retVal;
+  public Function<String, String> getExtractionFunction(){
+    return this.fn;
   }
 
   @Override

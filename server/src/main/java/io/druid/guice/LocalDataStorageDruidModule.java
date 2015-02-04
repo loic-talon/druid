@@ -51,6 +51,10 @@ public class LocalDataStorageDruidModule implements Module
                 .addBinding("local")
                 .to(LocalDataSegmentPuller.class)
                 .in(LazySingleton.class);
+    Binders.dataSegmentPullerBinder(binder)
+        .addBinding(LocalDataSegmentPuller.scheme)
+        .to(LocalDataSegmentPuller.class)
+        .in(LazySingleton.class);
 
     PolyBind.optionBinder(binder, Key.get(DataSegmentKiller.class))
         .addBinding("local")
