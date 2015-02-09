@@ -15,28 +15,9 @@
  * limitations under the License.
  */
 
-package io.druid.metadata;
+package io.druid.audit;
 
-import io.druid.server.coordinator.rules.Rule;
-
-import java.util.List;
-import java.util.Map;
-
-/**
- */
-public interface MetadataRuleManager
+public interface AuditableConfig
 {
-  public void start();
-
-  public void stop();
-
-  public void poll();
-
-  public Map<String, List<Rule>> getAllRules();
-
-  public List<Rule> getRules(final String dataSource);
-
-  public List<Rule> getRulesWithDefault(final String dataSource);
-
-  public boolean overrideRule(final String dataSource, final RulesConfig rulesConfig);
+  public AuditInfo getAuditInfo();
 }

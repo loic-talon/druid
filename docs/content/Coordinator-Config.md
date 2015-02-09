@@ -52,18 +52,23 @@ http://<COORDINATOR_IP>:<PORT>/coordinator/config
 A sample coordinator dynamic config JSON object is shown below:
 
 ```json
-{
-  "millisToWaitBeforeDeleting": 900000,
-  "mergeBytesLimit": 100000000L,
-  "mergeSegmentsLimit" : 1000,
-  "maxSegmentsToMove": 5,
-  "replicantLifetime": 15,
-  "replicationThrottleLimit": 10,
-  "emitBalancingStats": false
-}
+ {
+   "millisToWaitBeforeDeleting": 900000,
+   "mergeBytesLimit": 100000000L,
+   "mergeSegmentsLimit" : 1000,
+   "maxSegmentsToMove": 5,
+   "replicantLifetime": 15,
+   "replicationThrottleLimit": 10,
+   "emitBalancingStats": false,
+   "auditInfo" : {
+      "author" : <authorname>,
+      "emailId" : <emailId>,
+      "comment" : <comment describing the change>
+      }
+ }
 ```
 
-Issuing a GET request at the same URL will return the spec that is currently in place. A description of the config setup spec is shown below.
+Issuing a GET request at the same URL will return the config that is currently in place. A description of the config setup spec is shown below.
 
 |Property|Description|Default|
 |--------|-----------|-------|
@@ -74,3 +79,4 @@ Issuing a GET request at the same URL will return the spec that is currently in 
 |`replicantLifetime`|The maximum number of coordinator runs for a segment to be replicated before we start alerting.|15|
 |`replicationThrottleLimit`|The maximum number of segments that can be replicated at one time.|10|
 |`emitBalancingStats`|Boolean flag for whether or not we should emit balancing stats. This is an expensive operation.|false|
+|`auditInfo`| information used to make audit log for config changes. |null|

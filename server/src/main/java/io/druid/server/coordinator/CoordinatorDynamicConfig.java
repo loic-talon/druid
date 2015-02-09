@@ -18,8 +18,10 @@ package io.druid.server.coordinator;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import io.druid.audit.AuditInfo;
+import io.druid.audit.AuditableConfig;
 
-public class CoordinatorDynamicConfig
+public class CoordinatorDynamicConfig implements AuditableConfig
 {
   public static final String CONFIG_KEY = "coordinator.config";
 
@@ -31,6 +33,7 @@ public class CoordinatorDynamicConfig
   private final int replicationThrottleLimit;
   private final int balancerComputeThreads;
   private final boolean emitBalancingStats;
+  private final AuditInfo auditInfo;
 
   @JsonCreator
   public CoordinatorDynamicConfig(
@@ -41,7 +44,9 @@ public class CoordinatorDynamicConfig
       @JsonProperty("replicantLifetime") int replicantLifetime,
       @JsonProperty("replicationThrottleLimit") int replicationThrottleLimit,
       @JsonProperty("balancerComputeThreads") int balancerComputeThreads,
-      @JsonProperty("emitBalancingStats") boolean emitBalancingStats
+      @JsonProperty("emitBalancingStats") boolean emitBalancingStats,
+      @JsonProperty("auditInfo") AuditInfo auditInfo
+
   )
   {
     this.maxSegmentsToMove = maxSegmentsToMove;
@@ -55,6 +60,8 @@ public class CoordinatorDynamicConfig
         Math.max(balancerComputeThreads, 1),
         Math.max(Runtime.getRuntime().availableProcessors() - 1, 1)
     );
+    // allow null to maintain backwards compatibility
+    this.auditInfo = auditInfo == null ? new AuditInfo("NULL", "NULL", "NULL"): auditInfo;
   }
 
   @JsonProperty
@@ -103,6 +110,12 @@ public class CoordinatorDynamicConfig
   public int getBalancerComputeThreads()
   {
     return balancerComputeThreads;
+  }
+
+  @JsonProperty
+  public AuditInfo getAuditInfo()
+  {
+    return auditInfo;
   }
 
   public static class Builder
@@ -194,7 +207,8 @@ public class CoordinatorDynamicConfig
           replicantLifetime,
           replicationThrottleLimit,
           balancerComputeThreads,
-          emitBalancingStats
+          emitBalancingStats,
+          null
       );
     }
   }

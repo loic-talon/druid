@@ -22,6 +22,7 @@ import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.InjectableValues;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
+import io.druid.audit.AuditInfo;
 import io.druid.indexing.overlord.autoscaling.ec2.EC2AutoScaler;
 import io.druid.indexing.overlord.autoscaling.ec2.EC2EnvironmentConfig;
 import io.druid.indexing.overlord.autoscaling.ec2.EC2NodeData;
@@ -64,7 +65,8 @@ public class WorkerBehaviorConfigTest
             ),
             null,
             null
-        )
+        ),
+        new AuditInfo("test","test","test")
     );
 
     final ObjectMapper mapper = new DefaultObjectMapper();

@@ -19,12 +19,14 @@ package io.druid.indexing.overlord.setup;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import io.druid.audit.AuditInfo;
+import io.druid.audit.AuditableConfig;
 import io.druid.indexing.overlord.autoscaling.AutoScaler;
 import io.druid.indexing.overlord.autoscaling.NoopAutoScaler;
 
 /**
  */
-public class WorkerBehaviorConfig
+public class WorkerBehaviorConfig implements AuditableConfig
 {
   public static final String CONFIG_KEY = "worker.config";
   public static WorkerSelectStrategy DEFAULT_STRATEGY = new FillCapacityWorkerSelectStrategy();
@@ -32,20 +34,24 @@ public class WorkerBehaviorConfig
 
   public static WorkerBehaviorConfig defaultConfig()
   {
-    return new WorkerBehaviorConfig(DEFAULT_STRATEGY, DEFAULT_AUTOSCALER);
+    return new WorkerBehaviorConfig(DEFAULT_STRATEGY, DEFAULT_AUTOSCALER, null);
   }
 
   private final WorkerSelectStrategy selectStrategy;
   private final AutoScaler autoScaler;
+  private final AuditInfo auditInfo;
 
   @JsonCreator
   public WorkerBehaviorConfig(
       @JsonProperty("selectStrategy") WorkerSelectStrategy selectStrategy,
-      @JsonProperty("autoScaler") AutoScaler autoScaler
+      @JsonProperty("autoScaler") AutoScaler autoScaler,
+      @JsonProperty("suditInfo") AuditInfo auditInfo
   )
   {
     this.selectStrategy = selectStrategy;
     this.autoScaler = autoScaler;
+    // allow null to maintain backwards compatibility
+    this.auditInfo = auditInfo == null ? new AuditInfo("NULL", "NULL", "NULL") : auditInfo;
   }
 
   @JsonProperty
@@ -97,5 +103,11 @@ public class WorkerBehaviorConfig
            "selectStrategy=" + selectStrategy +
            ", autoScaler=" + autoScaler +
            '}';
+  }
+
+  @JsonProperty
+  public AuditInfo getAuditInfo()
+  {
+    return auditInfo;
   }
 }

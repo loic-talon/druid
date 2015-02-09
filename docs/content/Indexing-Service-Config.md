@@ -131,7 +131,12 @@ A sample worker config spec is shown below:
         "version": null
       }
     }
-  }
+  },
+  "auditInfo" : {
+    "author" : <authorname>,
+    "emailId" : <emailId>,
+    "comment" : <comment describing the change>
+    }
 }
 ```
 
@@ -141,6 +146,8 @@ Issuing a GET request at the same URL will return the current worker config spec
 |--------|-----------|-------|
 |`selectStrategy`|How to assign tasks to middlemanagers. Choices are `fillCapacity`, `fillCapacityWithAffinity`, and `equalDistribution`.|fillCapacity|
 |`autoScaler`|Only used if autoscaling is enabled. See below.|null|
+|`auditInfo`| information used to make audit log for config changes. |null|
+
 
 #### Worker Select Strategy
 

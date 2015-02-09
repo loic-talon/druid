@@ -18,7 +18,10 @@
 package io.druid.server.http;
 
 import com.google.inject.Inject;
+import io.druid.audit.AuditInfo;
+import io.druid.audit.AuditableConfig;
 import io.druid.metadata.MetadataRuleManager;
+import io.druid.metadata.RulesConfig;
 import io.druid.server.coordinator.rules.Rule;
 
 import javax.ws.rs.Consumes;
@@ -60,7 +63,6 @@ public class RulesResource
   public Response getDatasourceRules(
       @PathParam("dataSourceName") final String dataSourceName,
       @QueryParam("full") final String full
-
   )
   {
     if (full != null) {
@@ -71,6 +73,8 @@ public class RulesResource
                    .build();
   }
 
+  @Deprecated
+  // kept for backward compatibility
   @POST
   @Path("/{dataSourceName}")
   @Consumes(MediaType.APPLICATION_JSON)
@@ -79,9 +83,24 @@ public class RulesResource
       final List<Rule> rules
   )
   {
-    if (databaseRuleManager.overrideRule(dataSourceName, rules)) {
+    if (databaseRuleManager.overrideRule(dataSourceName, new RulesConfig(rules, new AuditInfo("NULL","NULL", "NULL")))) {
       return Response.ok().build();
     }
     return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
   }
+
+  @POST
+  @Path("/{dataSourceName}/rulesConfig")
+  @Consumes(MediaType.APPLICATION_JSON)
+  public Response setDatasourceRules(
+      @PathParam("dataSourceName") final String dataSourceName,
+      final RulesConfig rulesConfig
+  )
+  {
+    if (databaseRuleManager.overrideRule(dataSourceName, rulesConfig)) {
+      return Response.ok().build();
+    }
+    return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+  }
+
 }

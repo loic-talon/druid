@@ -23,6 +23,7 @@ import com.google.common.collect.Maps;
 import com.metamx.emitter.EmittingLogger;
 import com.metamx.emitter.service.ServiceEmitter;
 import com.metamx.emitter.service.ServiceEventBuilder;
+import io.druid.audit.AuditInfo;
 import io.druid.common.guava.DSuppliers;
 import io.druid.indexing.common.TaskStatus;
 import io.druid.indexing.common.TestMergeTask;
@@ -93,7 +94,8 @@ public class SimpleResourceManagementStrategyTest
     workerConfig = new AtomicReference<>(
         new WorkerBehaviorConfig(
             null,
-            autoScaler
+            autoScaler,
+            new AuditInfo("test","test","test")
         )
     );
 

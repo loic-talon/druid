@@ -26,6 +26,7 @@ import com.google.common.collect.Sets;
 import com.metamx.emitter.EmittingLogger;
 import com.metamx.emitter.service.ServiceEmitter;
 import com.metamx.emitter.service.ServiceEventBuilder;
+import io.druid.audit.AuditInfo;
 import io.druid.client.DruidServer;
 import io.druid.metadata.MetadataRuleManager;
 import io.druid.segment.IndexIO;
@@ -497,7 +498,7 @@ public class DruidCoordinatorRuleRunnerTest
 
     EasyMock.expect(coordinator.getDynamicConfigs()).andReturn(
         new CoordinatorDynamicConfig(
-            0, 0, 0, 0, 1, 24, 0, false
+            0, 0, 0, 0, 1, 24, 0, false, new AuditInfo("test","test@test.com","test")
         )
     ).anyTimes();
     coordinator.removeSegment(EasyMock.<DataSegment>anyObject());
@@ -1004,7 +1005,8 @@ public class DruidCoordinatorRuleRunnerTest
   {
     EasyMock.expect(coordinator.getDynamicConfigs()).andReturn(
         new CoordinatorDynamicConfig(
-            0, 0, 0, 0, 1, 7, 0, false
+            0, 0, 0, 0, 1, 7, 0, false, new AuditInfo("test","test@test.com","test")
+
         )
     ).atLeastOnce();
     coordinator.removeSegment(EasyMock.<DataSegment>anyObject());
@@ -1180,7 +1182,8 @@ public class DruidCoordinatorRuleRunnerTest
   {
     EasyMock.expect(coordinator.getDynamicConfigs()).andReturn(
         new CoordinatorDynamicConfig(
-            0, 0, 0, 0, 1, 24, 0, false
+            0, 0, 0, 0, 1, 24, 0, false, new AuditInfo("test","test@test.com","test")
+
         )
     ).anyTimes();
     coordinator.removeSegment(EasyMock.<DataSegment>anyObject());

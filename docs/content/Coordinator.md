@@ -197,9 +197,22 @@ Enables a segment.
 
 #### Rules
 
-* `/druid/coordinator/v1/rules/{dataSourceName}`
+* `/druid/coordinator/v1/rules/{dataSourceName}/rulesConfig
 
-POST with a list of rules in JSON form to update rules.
+POST with rules config containing list of rules and auditInfo in JSON form to update rules.
+
+A sample rules config spec is shown below:
+
+```json
+{
+  "rules" : [<rule1>, <rule2> ... list of rules... ],
+  "auditInfo" : {
+    "author" : <authorname>,
+    "emailId" : <emailId>,
+    "comment" : <comment describing the change>
+    }
+}
+```
 
 ### DELETE
 
