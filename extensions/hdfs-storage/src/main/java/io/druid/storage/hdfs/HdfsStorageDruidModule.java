@@ -36,6 +36,7 @@ import java.util.Properties;
  */
 public class HdfsStorageDruidModule implements DruidModule
 {
+  public static final String scheme = "hdfs";
   private Properties props = null;
 
   @Inject
@@ -53,9 +54,9 @@ public class HdfsStorageDruidModule implements DruidModule
   @Override
   public void configure(Binder binder)
   {
-    Binders.dataSegmentPullerBinder(binder).addBinding("hdfs").to(HdfsDataSegmentPuller.class).in(LazySingleton.class);
-    Binders.dataSegmentPusherBinder(binder).addBinding("hdfs").to(HdfsDataSegmentPusher.class).in(LazySingleton.class);
-    Binders.dataSegmentKillerBinder(binder).addBinding("hdfs").to(HdfsDataSegmentKiller.class).in(LazySingleton.class);
+    Binders.dataSegmentPullerBinder(binder).addBinding(scheme).to(HdfsDataSegmentPuller.class).in(LazySingleton.class);
+    Binders.dataSegmentPusherBinder(binder).addBinding(scheme).to(HdfsDataSegmentPusher.class).in(LazySingleton.class);
+    Binders.dataSegmentKillerBinder(binder).addBinding(scheme).to(HdfsDataSegmentKiller.class).in(LazySingleton.class);
 
     final Configuration conf = new Configuration();
     if (props != null) {

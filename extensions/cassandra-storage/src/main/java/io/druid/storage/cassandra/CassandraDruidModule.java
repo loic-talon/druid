@@ -48,6 +48,11 @@ public class CassandraDruidModule implements DruidModule
                 .to(CassandraDataSegmentPuller.class)
                 .in(LazySingleton.class);
 
+    Binders.dataSegmentPullerBinder(binder)
+           .addBinding(CassandraDataSegmentPuller.scheme)
+           .to(CassandraDataSegmentPuller.class)
+           .in(LazySingleton.class);
+
     PolyBind.optionBinder(binder, Key.get(DataSegmentPusher.class))
             .addBinding("c*")
             .to(CassandraDataSegmentPusher.class)

@@ -37,6 +37,7 @@ import java.util.List;
  */
 public class S3StorageDruidModule implements DruidModule
 {
+  public static String segmentFileScheme = "s3_zip";
   @Override
   public List<? extends Module> getJacksonModules()
   {
@@ -48,10 +49,10 @@ public class S3StorageDruidModule implements DruidModule
   {
     JsonConfigProvider.bind(binder, "druid.s3", AWSCredentialsConfig.class);
 
-    Binders.dataSegmentPullerBinder(binder).addBinding("s3_zip").to(S3DataSegmentPuller.class).in(LazySingleton.class);
-    Binders.dataSegmentKillerBinder(binder).addBinding("s3_zip").to(S3DataSegmentKiller.class).in(LazySingleton.class);
-    Binders.dataSegmentMoverBinder(binder).addBinding("s3_zip").to(S3DataSegmentMover.class).in(LazySingleton.class);
-    Binders.dataSegmentArchiverBinder(binder).addBinding("s3_zip").to(S3DataSegmentArchiver.class).in(LazySingleton.class);
+    Binders.dataSegmentPullerBinder(binder).addBinding(segmentFileScheme).to(S3DataSegmentPuller.class).in(LazySingleton.class);
+    Binders.dataSegmentKillerBinder(binder).addBinding(segmentFileScheme).to(S3DataSegmentKiller.class).in(LazySingleton.class);
+    Binders.dataSegmentMoverBinder(binder).addBinding(segmentFileScheme).to(S3DataSegmentMover.class).in(LazySingleton.class);
+    Binders.dataSegmentArchiverBinder(binder).addBinding(segmentFileScheme).to(S3DataSegmentArchiver.class).in(LazySingleton.class);
     Binders.dataSegmentPusherBinder(binder).addBinding("s3").to(S3DataSegmentPusher.class).in(LazySingleton.class);
     JsonConfigProvider.bind(binder, "druid.storage", S3DataSegmentPusherConfig.class);
     JsonConfigProvider.bind(binder, "druid.storage", S3DataSegmentArchiverConfig.class);

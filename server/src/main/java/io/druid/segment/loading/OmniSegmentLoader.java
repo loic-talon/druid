@@ -18,21 +18,30 @@
 package io.druid.segment.loading;
 
 import com.google.common.collect.Lists;
+import com.google.common.io.ByteSink;
+import com.google.common.io.Files;
 import com.google.inject.Inject;
 import com.metamx.common.ISE;
 import com.metamx.common.MapUtils;
+import com.metamx.common.RetryUtils;
 import com.metamx.common.logger.Logger;
 import io.druid.segment.QueryableIndex;
 import io.druid.segment.QueryableIndexSegment;
 import io.druid.segment.Segment;
+import io.druid.segment.SegmentMissingException;
 import io.druid.timeline.DataSegment;
+import io.druid.utils.CompressionUtils;
 import org.apache.commons.io.FileUtils;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.URI;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Callable;
+import java.util.zip.GZIPInputStream;
 
 /**
  */
@@ -127,21 +136,26 @@ public class OmniSegmentLoader implements SegmentLoader
           log.debug("Unable to make parent file[%s]", storageDir);
         }
         try {
-          downloadStartMarker.createNewFile();
+          if(!downloadStartMarker.createNewFile()){
+            // TODO: should this fail?
+            log.warn("Was not able to create new download marker for [%s]", storageDir);
+          }
         }
         catch (IOException e) {
-          throw new SegmentLoadingException("Unable to create marker file for [%s]", storageDir);
+          throw new SegmentLoadingException(e, "Unable to create marker file for [%s]", storageDir);
         }
       }
 
-      getPuller(segment.getLoadSpec()).getSegmentFiles(segment, storageDir);
+      if(segment.getLoadSpec().containsKey("uri")){
+        loadURI(segment.getLoadSpec(), storageDir);
+      } else {
+        // legacy
+        getPuller(segment.getLoadSpec()).getSegmentFiles(segment, storageDir);
+      }
 
       if (!downloadStartMarker.delete()) {
         throw new SegmentLoadingException("Unable to remove marker file for [%s]", storageDir);
       }
-
-
-      loc.addSegment(segment);
 
       retVal = storageDir;
     } else {
@@ -151,6 +165,76 @@ public class OmniSegmentLoader implements SegmentLoader
     loc.addSegment(segment);
 
     return retVal;
+  }
+
+  protected void loadURI(Map<String, Object> loadSpec, final File outDir) throws SegmentLoadingException
+  {
+    final URI uri = MapUtils.getURI(loadSpec, "uri");
+    log.debug("Loading URI [%s]", uri.toString());
+    final DataSegmentPuller puller = pullers.get(uri.getScheme());
+    if (puller == null) {
+      throw new SegmentLoadingException(
+          "Unknown loader type[%s].  Known types are %s",
+          uri.getScheme(),
+          pullers.keySet()
+      );
+    }
+    // We don't actually want to use this as a local file, but we want to be able to parse the path
+    final File file = new File(uri.getPath());
+    final String fileName = file.getName();
+    final long startTime = System.currentTimeMillis();
+    try {
+      RetryUtils.retry(
+          new Callable<Void>()
+          {
+            @Override
+            public Void call() throws Exception
+            {
+
+              if (fileName.endsWith(".zip")) {
+                log.debug("Loading zip uri [%s]", uri.toString());
+                try (InputStream in = puller.getUriInputStream(uri)) {
+                  CompressionUtils.unzip(in, outDir);
+                }
+                catch (IOException e) {
+                  throw new SegmentLoadingException(e, "Error pulling zip uri [%s]", uri.toString());
+                }
+              } else if (fileName.endsWith(".gz")) {
+                log.debug("Loading gz");
+                final File outFile = new File(outDir, fileName.substring(0, fileName.length() - ".gz".length()));
+                final ByteSink byteSink = Files.asByteSink(outFile);
+                try (InputStream in = puller.getUriInputStream(uri)) {
+                  byteSink.writeFrom(new GZIPInputStream(in));
+                }
+                catch (IOException e) {
+                  throw new SegmentLoadingException(e, "Error pulling gz uri [%s]", uri.toString());
+                }
+              } else {
+                // Try and let the puller resolve it (example: is a directory)
+                puller.getSegmentFiles(uri, outDir);
+              }
+              return null;
+            }
+          },
+          puller.buildShouldRetryPredicate(),
+          10
+      );
+    }
+    catch (Exception e) {
+      try {
+        FileUtils.deleteDirectory(outDir);
+      }
+      catch (IOException ioe) {
+        log.warn(
+            ioe,
+            "Failed to remove output directory [%s] after exception",
+            outDir
+        );
+        e.addSuppressed(ioe);
+      }
+      throw new SegmentLoadingException(e, "Could not load segment at uri [%s]", uri.toString());
+    }
+    log.info("Pulled data from [%s] in %d ms", uri.toString(), System.currentTimeMillis() - startTime);
   }
 
   @Override
@@ -179,6 +263,7 @@ public class OmniSegmentLoader implements SegmentLoader
     }
   }
 
+  @Deprecated
   private DataSegmentPuller getPuller(Map<String, Object> loadSpec) throws SegmentLoadingException
   {
     String type = MapUtils.getString(loadSpec, "type");
